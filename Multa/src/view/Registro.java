@@ -53,6 +53,15 @@ public class Registro extends javax.swing.JFrame {
         }
         llenarTabla();
     }
+    
+    public static String fechaActual(){
+    
+    Date fecha=new Date();
+    SimpleDateFormat formatoFecha=new SimpleDateFormat("dd/MM/YYYY");
+    
+    return formatoFecha.format(fecha);
+    
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -150,6 +159,11 @@ public class Registro extends javax.swing.JFrame {
         jLabel6.setText("Fecha");
 
         txtFecha.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter()));
+        txtFecha.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtFechaActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -274,6 +288,9 @@ public class Registro extends javax.swing.JFrame {
                 btnRegistrar.setEnabled(true);
             }
         });
+        
+        
+        txtFecha.setText(fechaActual());
     }
     
     int idMultaModif = 0;
@@ -410,6 +427,12 @@ public class Registro extends javax.swing.JFrame {
         } catch (Exception e) {
         }
     }//GEN-LAST:event_btnReporte1ActionPerformed
+
+    private void txtFechaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFechaActionPerformed
+
+
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFechaActionPerformed
 
     private void limpiarForm() {
         txtDNI.setText(null);

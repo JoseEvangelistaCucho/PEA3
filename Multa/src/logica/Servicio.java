@@ -28,15 +28,18 @@ public class Servicio {
                 String tipoMulta = rs.getString("tipo_multa");
                 Double multa     = rs.getDouble("monto");
                 String correo    = rs.getString("correo");
-                int punto        = rs.getInt("punto");
-                
+                int punto        = rs.getInt("puntos");
+               
+                       
                 objMulta.setIdMulta(idMulta);
                 objMulta.setDni(dni);
                 objMulta.setMulta(tipoMulta);
                 objMulta.setMonto(multa);
                 objMulta.setCorreo(correo);
                 objMulta.setPunto(punto);
+
                 lstMultas.add(objMulta);
+                
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,6 +50,8 @@ public class Servicio {
     public Respuesta validar(Multa multa) {
         Respuesta rpta = new Respuesta();
         rpta.setCodigo(0);
+       
+        
         if(multa.getMonto() > 1000) {
             rpta.setCodigo(1);
             rpta.setMsj("La multa no puede ser mayor a 1000 soles");
@@ -55,8 +60,29 @@ public class Servicio {
         if(multa.getMulta().equalsIgnoreCase("Pico placa") && multa.getMonto() < 500 ) {
             rpta.setCodigo(2);
             rpta.setMsj("La multa para pico y placa no puede ser menor a 500");
-            return rpta;
+           return rpta;
         }
+
+        
+         if(multa.getMulta().equalsIgnoreCase("Alta velocidad") && multa.getMonto()<400 | multa.getMonto()>570 ){
+            rpta.setCodigo(3);
+            rpta.setMsj("La cantidad no debe ser menor a 400 ni mayor a 570");   
+             return rpta;}
+         
+         if(multa.getMulta().equalsIgnoreCase("Luz roja") && multa.getMonto()<130 | multa.getMonto()>250){
+            rpta.setCodigo(4);
+            rpta.setMsj("La cantidad no debe ser menor a 130 ni mayor a 250");           
+           return rpta;}
+         
+         if(multa.getMulta().equalsIgnoreCase("mal estacionado") && multa.getMonto()<100 | multa.getMonto()>190){
+            rpta.setCodigo(5);
+            rpta.setMsj("La cantidad no debe ser menor a 100 ni mayor a 190");   
+             return rpta;}
+         if(multa.getMulta().equalsIgnoreCase("Pico placa") && multa.getMonto()<130 | multa.getMonto()>330){
+            rpta.setCodigo(6);
+            rpta.setMsj("La cantidad no debe ser menor a 130 ni mayor a 330");
+         return rpta;}
+        
         return rpta;
     }
     
@@ -79,8 +105,15 @@ public class Servicio {
                 rpta.setMsj("No se puede registrar mas de 2 multas por día");
                 return rpta;
             }
+            int cantidadPuntos = getvalidarcantidad(multa.getDni());
+            if(cantidadPuntos+multa.getPunto() > 100) {
+                rpta.setCodigo(-1);
+                rpta.setMsj("Con "+multa.getPunto()+" puntos , supera los 100 puntos maximos");
+                return rpta;
+            }
+            
             Connection con = Conexion.startConeccion();
-            String query = "INSERT INTO `sat`.`multa` (`dni`, `tipo_multa`, `monto`, `correo`, `punto`, `fec_regi`) VALUES (?, ?, ?, ?, ?, ?)";
+            String query = "INSERT INTO `sat`.`multa` (`dni`, `tipo_multa`, `monto`, `correo`, `puntos`, `fec_regi`) VALUES (?, ?, ?, ?, ?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, multa.getDni());
             ps.setString(2, multa.getMulta());
@@ -107,7 +140,7 @@ public class Servicio {
                 return rpta;
             }
             Connection con = Conexion.startConeccion();
-            String query = "UPDATE `sat`.`multa` SET tipo_multa = ?, monto = ?, correo = ?, punto = ? WHERE id_multa = ?";
+            String query = "UPDATE `sat`.`multa` SET tipo_multa = ?, monto = ?, correo = ?, puntos = ? WHERE id_multa = ?";
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, multa.getMulta());
             ps.setDouble(2, multa.getMonto());
@@ -158,6 +191,24 @@ public class Servicio {
                 cantidadMultas = rs.getInt("cantidad");
             }
             return cantidadMultas;
+        } catch(Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+     public int getvalidarcantidad(String dni) {
+        try {
+            //
+            Connection con = Conexion.startConeccion();
+            String query = "SELECT COUNT(1),puntos AS cantidad FROM multa WHERE dni = ?";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, dni);
+            ResultSet rs = ps.executeQuery();
+              int   cantidadPuntos=-2;
+            while(rs.next()) {
+              cantidadPuntos = rs.getInt("cantidad");
+            }
+            return cantidadPuntos;
         } catch(Exception e) {
             e.printStackTrace();
             return -1;
